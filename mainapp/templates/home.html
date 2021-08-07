@@ -1,0 +1,208 @@
+{% load static %}
+<div
+  class="tab-pane fade show active"
+  id="mainpage"
+  role="tabpanel"
+  aria-labelledby="main-tab"
+>
+  <div id="mainrow" class="row">
+    <div id="FormArea" class="col-md-6">
+      <div class="card-hover bg-light shadow">
+        <div class="card-header bg-cardheadcolor">
+          <h3>Upload Form</h3>
+          <!-- <button id="shownewjobform">Run New Job</button>
+          <button id="showoldjobform">View Previous Job</button> -->
+        </div>
+        <div id="NewJobForm" class="card-body">
+          <form
+            id="Mainform"
+            action="/newjob/"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            {% csrf_token %} {{form.as_p}}
+            <p id="ErrorMessage"></p>
+            <button id="runnewjob" type="submit" class="btn btn-primary">
+              Run
+            </button>
+          </form>
+        </div>
+        <div id="OldJobForm" class="card-body" style="display: none">
+          <form id="PreviousJob">
+            <label for="old_jobid">Job Id</label>
+            <input
+              id="old_jobid"
+              type="text"
+              class="form-control"
+              style="width: 80%"
+            />
+
+            <p id="OldErrorMessage"></p>
+            <button id="viewoldjob" type="submit" class="btn btn-primary">
+              View
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- <div><img src="{%static 'images/helical_polymers.jpg' %}" alt="" /></div> -->
+    </div>
+    <div id="jobrow" class="row">
+        <div class="col-md-8" id="Jobinfo" style="display: none">
+          <table class="table table-hover shadow">
+            <thead class="thead" style="background-color: mintcream;">
+              <tr>
+                <th scope="col">Job Info</th>
+                <th scope="col" width="120">Status</th>
+                <th scope="col" width="120">Time Taken</th>
+                <th scope="col" width="150">Operations</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="job-id" style="color: green">Job ID: </td>
+                <td id="job-status" style="color: green"></td>
+                <td id="time-taken" style="color: red"></td>
+                <td id="operation" style="display: none">
+                  <div id="downloadlink">
+                    <span class="material-icons" style="font-size: 20px">
+                      download
+                    </span>
+                  </div>
+                  <div id="deletelink">
+                    <span class="material-icons" style="font-size: 20px">
+                      delete
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <br><br>
+        </div>
+        <div class="col-md-3" id="AnotherJob"></div>
+      </div>
+    </div>
+
+  <script>
+    // Creating Job-info div for Job
+    function createjobinfo(jobid,time_taken) {
+      $( "div" ).remove( "#job-stat" );
+      $("#job-id").append(jobid);
+      $("#job-status").append("<div id='job-stat'>Completed</div>");
+      var deleteLink = "deletejob/" + jobid;
+      var downloadLink = "download_files/" + jobid;
+      $("#downloadlink").append(
+        '<a href="' + downloadLink + '">Download Files</a>'
+      );
+      $("#deletelink").append(
+        '<a id="deletejob" href="' + deleteLink + '">Delete Files</a>'
+      );
+      $("#operation").show();
+      $("#AnotherJob").append('<a href="">Run a new Job</a>');
+      $("#time-taken").append('<div>'+time_taken+' seconds</div>');
+    }
+
+    $(document).on("click", "#runnewjob", function (e) {
+      e.preventDefault();
+
+      // form validation
+      if (!($("#id_email").val() && $("#id_file")[0].files[0])) {
+        $("#errorline").remove();
+        $("#ErrorMessage").append(
+          "<div id='errorline' class='text-danger'>Please Complete the form</div>"
+        );
+        return false;
+      }
+      function validateEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+      if (!validateEmail($("#id_email").val())) {
+        $("#errorline").remove();
+        $("#ErrorMessage").append(
+          "<div id='errorline' class='text-danger'>Enter a valid Email</div>"
+        );
+        return false;
+      }
+      if (!$("#id_check_terms:checked").val()) {
+        $("#errorline").remove();
+        $("#ErrorMessage").append(
+          "<div id='errorline' class='text-danger'>Accept the terms and Conditions First</div>"
+        );
+        return false;
+      }
+      $("#errorline").remove();
+      $("#mainrow").hide();
+      $("#Jobinfo").show();
+      $("#job-status").append("<div id='job-stat'>running</div>");
+
+      var formData = new FormData();
+      formData.append("check_terms", "True");
+      formData.append("file", $("#id_file")[0].files[0]);
+      formData.append("email", $("#id_email").val());
+      formData.append("action", "newjob");
+      formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+      $.ajax({
+        type: "POST",
+        url: "newjob/",
+        data: formData,
+        cache: false,
+        processData: false,
+        contentType: false,
+        enctype: "multipart/form-data",
+        success: function (data) {
+          if (data.error) {
+            $("#ErrorMessage").append(
+          "<div id='errorline' class='text-danger'>"+data.error+"</div>"
+        );  $("#mainrow").show();
+            $("#Jobinfo").hide();
+            $("#job-stat").remove();
+            // console.log(data.error);
+            // return false;
+          }
+          else {
+          // After Job Success
+          createjobinfo(data.jobid,data.time_taken);
+          }
+        },
+        error: function (data) {
+          console.log(data.error);
+        },
+      });
+    });
+    $("#shownewjobform").on("click", function (event) {
+      $(this).addClass("bg-warning");
+      $("#showoldjobform").addClass("bg-white");
+      $("#NewJobForm").show();
+      $("#OldJobForm").hide();
+    });
+    $("#showoldjobform").on("click", function (event) {
+      $(this).addClass("bg-warning");
+      $("#shownewjobform").addClass("bg-white");
+      $("#NewJobForm").hide();
+      $("#OldJobForm").show();
+    });
+
+
+    $(document).on("click", "#deletejob", function (e) {
+      e.preventDefault();
+      $.ajax({
+        type: "GET",
+        url: this.href,
+        success: function (data) {
+          if (data.error) {
+            alert(data.error);
+            return false;
+          }
+          alert("Job Deleted Sucessfully");
+          $("#Jobinfo").hide();
+        },
+        error: function (data) {
+          alert(data.error);
+        },
+      });
+    });
+
+  </script>
+</div>

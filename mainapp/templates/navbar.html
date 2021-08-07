@@ -1,0 +1,64 @@
+{% load static %}
+<style>
+  .bg-navcolor {
+    background-color: mediumturquoise;
+  }
+</style>
+<nav
+  class="navbar fixed-top bg-navcolor text-dark"
+  style="padding: 0.1rem 1rem !important"
+>
+  <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg align-center">
+      <span
+        ><img src="{% static 'images/companylogo.jpg'%}" height="35px"
+      /></span>
+      <span
+        >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </span>
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+          <a
+            class="nav-link active"
+            id="mainpage-tab"
+            data-toggle="tab"
+            href="#mainpage"
+            role="tab"
+            aria-controls="mainpage"
+            aria-selected="true"
+            style="color: black"
+            >Home</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            id="works-tab"
+            data-toggle="tab"
+            href="#works"
+            role="tab"
+            aria-controls="mainpage"
+            aria-selected="false"
+            style="color: black"
+            >How it works</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            id="aboutus-tab"
+            data-toggle="tab"
+            href="#aboutus"
+            role="tab"
+            aria-controls="aboutus"
+            aria-selected="false"
+            style="color: black"
+            >About Us</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </div>
+</nav>
